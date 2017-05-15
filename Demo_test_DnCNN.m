@@ -14,13 +14,13 @@ fpath = fullfile(Original_image_dir, '*.png');
 im_dir  = dir(fpath);
 im_num = length(im_dir);
 
-for noiseSigma  = [20 40 60 80 100]  %%% image noise level
+for nSig  = [20 40 60 80 100]  %%% image noise level
     %%% load [specific] Gaussian denoising model
     folderModel = 'model';
-    showResult  = 1;
+    showResult  = 0;
     useGPU      = 0;
     pauseTime   = 1;
-    modelSigma  = min(75,max(10,round(noiseSigma/5)*5)); %%% model noise level
+    modelSigma  = min(75,max(10,round(nSig/5)*5)); %%% model noise level
     load(fullfile(folderModel,'specifics',['sigma=',num2str(modelSigma,'%02d'),'.mat']));
     
     %%% load [blind] Gaussian denoising model %%% for sigma in [0,55]
@@ -48,11 +48,11 @@ for noiseSigma  = [20 40 60 80 100]  %%% image noise level
         
         %%% read images
         label = imread(fullfile(Original_image_dir,im_dir(i).name));
-        [~,nameCur,extCur] = fileparts(filePaths(i).name);
+        S = regexp(im_dir(i).name, '\.', 'split');
         label = im2double(label);
         
         randn('seed',0);
-        input = single(label + noiseSigma/255*randn(size(label)));
+        input = single(label + nSig/255*randn(size(label)));
         
         %%% convert to GPU
         if useGPU
@@ -73,16 +73,16 @@ for noiseSigma  = [20 40 60 80 100]  %%% image noise level
         [PSNRCur, SSIMCur] = Cal_PSNRSSIM(im2uint8(label),im2uint8(output),0,0);
         if showResult
             imshow(cat(2,im2uint8(label),im2uint8(input),im2uint8(output)));
-            title([filePaths(i).name,'    ',num2str(PSNRCur,'%2.2f'),'dB','    ',num2str(SSIMCur,'%2.4f')])
+            title([im_dir(i).name,'    ',num2str(PSNRCur,'%2.2f'),'dB','    ',num2str(SSIMCur,'%2.4f')])
             drawnow;
             pause(pauseTime)
         end
         PSNR(i) = PSNRCur;
         SSIM(i) = SSIMCur;
+        fprintf('%s : PSNR = %2.4f, SSIM = %2.4f \n', im_dir(i).name, PSNR(i), SSIM(i)  );
         imname = sprintf('C:/Users/csjunxu/Desktop/NIPS2017/W3Results/DnCNN/DnCNN_nSig%d_%s', nSig, im_dir(i).name);
-        imwrite(im, imname);
+        imwrite(output, imname);
     end
-    
     mPSNR=mean(PSNR);
     mSSIM=mean(SSIM);
     fprintf('The average PSNR = %2.4f, SSIM = %2.4f. \n', mPSNR,mSSIM);
