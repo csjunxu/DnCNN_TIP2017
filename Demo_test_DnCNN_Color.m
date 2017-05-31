@@ -76,7 +76,7 @@ for noiseSigma  = 31  %%% image noise level
                       input = zeros(size(label));
                 for c = 1:ch
                     randn('seed',0);
-                    input(:, :, c) = label(:, :, c) + nSig(c) * randn(size(label(:, :, c)));
+                    input(:, :, c) = label(:, :, c) + nSig(c)/255 * randn(size(label(:, :, c)));
                 end
         input = im2double(input);
         
@@ -86,7 +86,7 @@ for noiseSigma  = 31  %%% image noise level
         end
         
         %     res    = vl_simplenn(net,input,[],[],'conserveMemory',true,'mode','test');
-        res = simplenn_matlab(net, input); %%% use this if you did not install matconvnet.
+        res = simplenn_matlab(net, input); %% use this if you did not install matconvnet.
         output = input - res(end).x;
         toc
         %%% convert to CPU
