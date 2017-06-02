@@ -20,7 +20,7 @@ if ~isdir(write_sRGB_dir)
     mkdir(write_sRGB_dir)
 end
 
-nSig = [40 20 30];
+nSig = [25 25 25];
 
 folderModel = 'C:\Users\csjunxu\Desktop\JunXu\Paper\Image Video Denoising\DnCNN-master\model\';
 
@@ -28,7 +28,7 @@ showResult  = 1;
 useGPU      = 0;
 pauseTime   = 1;
 
-for noiseSigma  = 31  %%% image noise level
+for noiseSigma  = 25  %%% image noise level
     %%% load blind Gaussian denoising model (color image)
     load(fullfile(folderModel,'GD_Color_Blind.mat')); %%% for sigma in [0,55]
     
@@ -44,42 +44,33 @@ for noiseSigma  = 31  %%% image noise level
         net = vl_simplenn_move(net, 'gpu') ;
     end
     
-    %%% read images
-    %     ext         =  {'*.jpg','*.png','*.bmp'};
-    ext         =  {'.JPG','.png'};
-    NoisyfilePaths = [];
-    meanfilePaths = [];
-    %     for i = 1 : length(ext)
-    %         NoisyfilePaths = cat(1,NoisyfilePaths, dir([folderTest '*real' ext{i}]));
-    %         meanfilePaths = cat(1,meanfilePaths, dir([folderTest '*mean' ext{i}]));
-    %     end
-    for i = 1 : length(ext)
-        NoisyfilePaths = cat(1,NoisyfilePaths, dir([folderTest 'Real_NoisyImage\*' ext{i}]));
-        meanfilePaths = cat(1,meanfilePaths, dir([folderTest 'Real_MeanImage\*' ext{i}]));
-    end
     
     %%% PSNR and SSIM
-    % PSNRs = zeros(1,length(filePaths));
-    % SSIMs = zeros(1,length(filePaths));
     PSNRs = zeros(1, im_num);
     SSIMs = zeros(1, im_num);
     for i = 1:im_num
         
         %%% read current image
-        label = double( imread(fullfile(Original_image_dir, im_dir(i).name)) );
-        %         label = imread([folderTest meanfilePaths(i).name]);
-%         [~,nameCur,extCur] = fileparts(meanfilePaths(i).name);
-        label = im2double(label);
+        label = double( imread(fullfile(Original_image_dir, im_dir(i).name)) )/255;
+        %         label = im2double(label);
         tic
-            %% add Gaussian noise
-              [h, w, ch] = size(label);
-                      input = zeros(size(label));
-                for c = 1:ch
-                    randn('seed',0);
-                    input(:, :, c) = label(:, :, c) + nSig(c)/255 * randn(size(label(:, :, c)));
-                end
-        input = im2double(input);
+        %% add Gaussian noise
+        [h, w, ch] = size(label);
+        input = zeros(size(label));
         
+        % global Gaussian
+        randn('seed',0);
+        input = label+ nSig(1)/255 * randn(size(label));
+        % each channel is Gaussian
+        %         for c = 1:ch
+        %             randn('seed',0);
+        %             input(:, :, c) = label(:, :, c) + nSig(c)/255 * randn(size(label(:, :, c)));
+        %         end
+        
+        fprintf('%s :\n', im_dir(i).name);
+        PSNR =   csnr( input*255, label*255, 0, 0 );
+        SSIM      =  cal_ssim( input*255, label*255, 0, 0 );
+        fprintf('The initial value of PSNR = %2.4f, SSIM = %2.4f \n', PSNR,SSIM);
         %% convert to GPU
         if useGPU
             input = gpuArray(input);
@@ -97,18 +88,16 @@ for noiseSigma  = 31  %%% image noise level
         
         %%% calculate PSNR
         %         [psnr_cur, ssim_cur] = Cal_PSNRSSIM(im2uint8(label),im2uint8(output),0,0);
-        psnr_cur=csnr(im2uint8(label), im2uint8(output), 0, 0);
-        ssim_cur = cal_ssim(im2uint8(label), im2uint8(output), 0, 0);
+        PSNRs(i)=csnr(label*255, output*255, 0, 0);
+        SSIMs(i) = cal_ssim(label*255, output*255, 0, 0);
         %         if showResult
         %             imshow(cat(2,im2uint8(label),im2uint8(input),im2uint8(output)));
         %             title([NoisyfilePaths(i).name,'    ',num2str(psnr_cur,'%2.2f'),'dB','    ',num2str(ssim_cur,'%2.4f')])
         %             drawnow;
         %             pause(pauseTime)
         %         end
-        PSNRs(i) = psnr_cur;
-        SSIMs(i) = ssim_cur;
         fprintf('The final PSNR = %2.4f, SSIM = %2.4f. \n', PSNRs(i), SSIMs(i));
-%         imwrite(im2uint8(output), [write_sRGB_dir method '/' method '_nSig' num2str(nSig(1)) num2str(nSig(2)) num2str(nSig(3)) '_' im_dir(i).name]);
+        %         imwrite(im2uint8(output), [write_sRGB_dir method '/' method '_nSig' num2str(nSig(1)) num2str(nSig(2)) num2str(nSig(3)) '_' im_dir(i).name]);
     end
     mPSNR = mean(PSNRs);
     mSSIM = mean(SSIMs);

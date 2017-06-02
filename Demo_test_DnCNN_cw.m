@@ -6,86 +6,97 @@
 clear; clc;
 addpath('utilities');
 
-
-
-Original_image_dir  =    'C:\Users\csjunxu\Desktop\Projects\WODL\20images\';
+Original_image_dir  =    'C:\Users\csjunxu\Desktop\JunXu\Datasets\kodak24\kodak_color\';
 Sdir = regexp(Original_image_dir, '\', 'split');
 fpath = fullfile(Original_image_dir, '*.png');
 im_dir  = dir(fpath);
 im_num = length(im_dir);
+nSig = [40 20 30];
 
-for nSig  = [20 40 60 80 100]  %%% image noise level
-    %%% load [specific] Gaussian denoising model
-    folderModel = 'model';
-    showResult  = 0;
-    useGPU      = 0;
-    pauseTime   = 1;
-    modelSigma  = min(75,max(10,round(nSig/5)*5)); %%% model noise level
-    load(fullfile(folderModel,'specifics',['sigma=',num2str(modelSigma,'%02d'),'.mat']));
+
+%% write image directory
+write_sRGB_dir = ['C:/Users/csjunxu/Desktop/ICCV2017/24images/'];
+if ~isdir(write_sRGB_dir)
+    mkdir(write_sRGB_dir)
+end
+
+
+%% load [specific] Gaussian denoising model
+folderModel = 'C:\Users\csjunxu\Desktop\JunXu\Paper\Image Video Denoising\DnCNN-master\model\';
+showResult  = 0;
+useGPU      = 0;
+pauseTime   = 1;
+
+
+%% PSNR and SSIM
+PSNR = zeros(1,im_num);
+SSIM = zeros(1,im_num);
+
+for i = 1:im_num
+    %% read images
+    label = imread(fullfile(Original_image_dir,im_dir(i).name));
+    S = regexp(im_dir(i).name, '\.', 'split');
+    label = im2double(label);
     
-    %%% load [blind] Gaussian denoising model %%% for sigma in [0,55]
-    
-    % load(fullfile(folderModel,'GD_Gray_Blind.mat'));
-    
-    
-    %%%
-    % net = vl_simplenn_tidy(net);
-    
-    % for i = 1:size(net.layers,2)
-    %     net.layers{i}.precious = 1;
-    % end
-    
-    %%% move to gpu
-    if useGPU
-        net = vl_simplenn_move(net, 'gpu') ;
-    end
-    
-    %%% PSNR and SSIM
-    PSNR = zeros(1,im_num);
-    SSIM = zeros(1,im_num);
-    
-    for i = 1:im_num
-        
-        %%% read images
-        label = imread(fullfile(Original_image_dir,im_dir(i).name));
-        S = regexp(im_dir(i).name, '\.', 'split');
-        label = im2double(label);
-        
+    [h, w, ch] = size(label);
+    input = zeros(size(label));
+    output = zeros(size(label));
+    for c = 1:ch
         randn('seed',0);
-        input = single(label + nSig/255*randn(size(label)));
+        input(:, :, c) = label(:, :, c) + nSig(c)/255 * randn(size(label(:, :, c)));
+    end
+    fprintf('%s :\n', im_dir(i).name);
+    PSNR =   csnr( input*255, label*255, 0, 0 );
+    SSIM      =  cal_ssim( input*255, label*255, 0, 0 );
+    fprintf('The initial value of PSNR = %2.4f, SSIM = %2.4f \n', PSNR,SSIM);
+            tic
+    for c = 1:ch
         
-        %%% convert to GPU
+        modelSigma  = min(75,max(10,round(nSig(c)/5)*5)); %%% model noise level
+        load(fullfile(folderModel,'specifics',['sigma=',num2str(modelSigma,'%02d'),'.mat']));
+        
+        
+        %% load [blind] Gaussian denoising model %%% for sigma in [0,55]
+        
+        % load(fullfile(folderModel,'GD_Gray_Blind.mat'));
+
+        %%%
+        % net = vl_simplenn_tidy(net);
+        
+        % for i = 1:size(net.layers,2)
+        %     net.layers{i}.precious = 1;
+        % end
+        
+        %%% move to gpu
         if useGPU
-            input = gpuArray(input);
+            net = vl_simplenn_move(net, 'gpu') ;
         end
-        res = simplenn_matlab(net, input);
+
+        %% convert to GPU
+        if useGPU
+            input(:, :, c) = gpuArray(input(:, :, c));
+        end
+        res = simplenn_matlab(net, input(:, :, c));
         %     res    = vl_simplenn(net,input,[],[],'conserveMemory',true,'mode','test');
         %res = simplenn_matlab(net, input); %%% use this if you did not install matconvnet.
-        output = input - res(end).x;
-        
-        %%% convert to CPU
-        if useGPU
-            output = gather(output);
-            input  = gather(input);
-        end
-        
-        %%% calculate PSNR and SSIM
-        [PSNRCur, SSIMCur] = Cal_PSNRSSIM(im2uint8(label),im2uint8(output),0,0);
-        if showResult
-            imshow(cat(2,im2uint8(label),im2uint8(input),im2uint8(output)));
-            title([im_dir(i).name,'    ',num2str(PSNRCur,'%2.2f'),'dB','    ',num2str(SSIMCur,'%2.4f')])
-            drawnow;
-            pause(pauseTime)
-        end
-        PSNR(i) = PSNRCur;
-        SSIM(i) = SSIMCur;
-        fprintf('%s : PSNR = %2.4f, SSIM = %2.4f \n', im_dir(i).name, PSNR(i), SSIM(i)  );
-        imname = sprintf('C:/Users/csjunxu/Desktop/NIPS2017/W3Results/DnCNN/DnCNN_nSig%d_%s', nSig, im_dir(i).name);
-        imwrite(output, imname);
+        output(:, :, c)  = input(:, :, c) - res(end).x;
     end
-    mPSNR=mean(PSNR);
-    mSSIM=mean(SSIM);
-    fprintf('The average PSNR = %2.4f, SSIM = %2.4f. \n', mPSNR,mSSIM);
-    name = sprintf(['C:/Users/csjunxu/Desktop/NIPS2017/W3Results/DnCNN_nSig' num2str(nSig) '.mat']);
-    save(name, 'nSig','PSNR','SSIM','mPSNR','mSSIM');
+          toc
+    %% convert to CPU
+    if useGPU
+        output = gather(output);
+        input  = gather(input);
+    end
+    PSNRs(i)=csnr(label*255, output*255, 0, 0);
+    SSIMs(i) = cal_ssim(label*255, output*255, 0, 0);
+    
+    fprintf('%s : PSNR = %2.4f, SSIM = %2.4f \n', im_dir(i).name, PSNRs(i), SSIMs(i)  );
+    %         imname = sprintf('C:/Users/csjunxu/Desktop/NIPS2017/W3Results/DnCNN/DnCNN_nSig%d_%s', nSig, im_dir(i).name);
+    %         imwrite(output, imname);
 end
+mPSNR=mean(PSNRs);
+mSSIM=mean(SSIMs);
+fprintf('The average PSNR = %2.4f, SSIM = %2.4f. \n', mPSNR,mSSIM);
+name = sprintf([write_sRGB_dir 'DnCNNcw_nSig' num2str(nSig(1)) num2str(nSig(2)) num2str(nSig(3)) '.mat']);
+save(name, 'nSig','PSNRs','SSIMs','mPSNR','mSSIM');
+
