@@ -1,16 +1,16 @@
 clear
-% GT_Original_image_dir = 'C:\Users\csjunxu\Desktop\CVPR2017\cc_Results\Real_ccnoise_denoised_part\';
-% GT_fpath = fullfile(GT_Original_image_dir, '*mean.png');
-% TT_Original_image_dir = 'C:\Users\csjunxu\Desktop\CVPR2017\cc_Results\Real_ccnoise_denoised_part\';
-% TT_fpath = fullfile(TT_Original_image_dir, '*real.png');
+GT_Original_image_dir = 'C:\Users\csjunxu\Desktop\CVPR2017\cc_Results\Real_ccnoise_denoised_part\';
+GT_fpath = fullfile(GT_Original_image_dir, '*mean.png');
+TT_Original_image_dir = 'C:\Users\csjunxu\Desktop\CVPR2017\cc_Results\Real_ccnoise_denoised_part\';
+TT_fpath = fullfile(TT_Original_image_dir, '*real.png');
 % GT_Original_image_dir = 'C:\Users\csjunxu\Desktop\CVPR2017\cc_Results\Real_MeanImage\';
 % GT_fpath = fullfile(GT_Original_image_dir, '*.png');
 % TT_Original_image_dir = 'C:\Users\csjunxu\Desktop\CVPR2017\cc_Results\Real_NoisyImage\';
 % TT_fpath = fullfile(TT_Original_image_dir, '*.png');
-GT_Original_image_dir = 'C:\Users\csjunxu\Desktop\CVPR2017\our_Results\Real_MeanImage\';
-GT_fpath = fullfile(GT_Original_image_dir, '*.JPG');
-TT_Original_image_dir = 'C:\Users\csjunxu\Desktop\CVPR2017\our_Results\Real_NoisyImage\';
-TT_fpath = fullfile(TT_Original_image_dir, '*.JPG');
+% GT_Original_image_dir = 'C:\Users\csjunxu\Desktop\CVPR2017\our_Results\Real_MeanImage\';
+% GT_fpath = fullfile(GT_Original_image_dir, '*.JPG');
+% TT_Original_image_dir = 'C:\Users\csjunxu\Desktop\CVPR2017\our_Results\Real_NoisyImage\';
+% TT_fpath = fullfile(TT_Original_image_dir, '*.JPG');
 % GT_Original_image_dir = 'C:\Users\csjunxu\Desktop\CVPR2017\1_Results\Real_NoisyImage\';
 % GT_fpath = fullfile(GT_Original_image_dir, '*.png');
 % TT_Original_image_dir = 'C:\Users\csjunxu\Desktop\CVPR2017\1_Results\Real_NoisyImage\';
@@ -23,9 +23,8 @@ im_num = length(TT_im_dir);
 %%% The model is trained with 1) noise levels in [0 55]; 2) 432 training images.
 
 addpath('utilities');
-% folderTest  = 'C:\Users\csjunxu\Desktop\JunXu\Datasets\kodak24\kodak_color\'; %%% test dataset
 
-folderTest  = 'C:\Users\csjunxu\Desktop\CVPR2017\our_Results\';
+folderTest  = 'C:\Users\csjunxu\Desktop\CVPR2017\cc_Results\';
 
 method           =  'DnCNN';
 %% write image directory
@@ -33,8 +32,7 @@ write_sRGB_dir = ['C:/Users/csjunxu/Desktop/CVPR2017/our_Results/'];
 if ~isdir(write_sRGB_dir)
     mkdir(write_sRGB_dir)
 end
-folderModel = 'model';
-noiseSigma  = 45;  %%% image noise level
+folderModel = 'C:\Users\csjunxu\Desktop\JunXu\Paper\Image Video Denoising\DnCNN-master\model';
 showResult  = 1;
 useGPU      = 0;
 pauseTime   = 1;

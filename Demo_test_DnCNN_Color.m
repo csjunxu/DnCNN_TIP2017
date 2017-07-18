@@ -20,7 +20,7 @@ if ~isdir(write_sRGB_dir)
     mkdir(write_sRGB_dir)
 end
 
-nSig = [25 25 25];
+nSig = [40 20 30];
 
 folderModel = 'C:\Users\csjunxu\Desktop\JunXu\Paper\Image Video Denoising\DnCNN-master\model\';
 
