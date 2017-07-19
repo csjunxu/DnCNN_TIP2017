@@ -24,11 +24,11 @@ im_num = length(TT_im_dir);
 
 addpath('utilities');
 
-folderTest  = 'C:\Users\csjunxu\Desktop\CVPR2017\cc_Results\';
+folderTest  = TT_Original_image_dir;
 
 method           =  'DnCNN';
 %% write image directory
-write_sRGB_dir = ['C:/Users/csjunxu/Desktop/CVPR2017/our_Results/'];
+write_sRGB_dir = ['C:/Users/csjunxu/Desktop/CVPR2017/cc_Results/'];
 if ~isdir(write_sRGB_dir)
     mkdir(write_sRGB_dir)
 end
@@ -58,14 +58,14 @@ for noiseSigma  = 5  %%% image noise level
     ext         =  {'.JPG','.png'};
     NoisyfilePaths = [];
     meanfilePaths = [];
-    %     for i = 1 : length(ext)
-    %         NoisyfilePaths = cat(1,NoisyfilePaths, dir([folderTest '*real' ext{i}]));
-    %         meanfilePaths = cat(1,meanfilePaths, dir([folderTest '*mean' ext{i}]));
-    %     end
     for i = 1 : length(ext)
-        NoisyfilePaths = cat(1,NoisyfilePaths, dir([folderTest 'Real_NoisyImage\*' ext{i}]));
-        meanfilePaths = cat(1,meanfilePaths, dir([folderTest 'Real_MeanImage\*' ext{i}]));
+        NoisyfilePaths = cat(1,NoisyfilePaths, dir([folderTest '*real' ext{i}]));
+        meanfilePaths = cat(1,meanfilePaths, dir([folderTest '*mean' ext{i}]));
     end
+    %     for i = 1 : length(ext)
+    %         NoisyfilePaths = cat(1,NoisyfilePaths, dir([folderTest '\*' ext{i}]));
+    %         meanfilePaths = cat(1,meanfilePaths, dir([folderTest '\*' ext{i}]));
+    %     end
     
     %%% PSNR and SSIM
     % PSNRs = zeros(1,length(filePaths));
@@ -75,7 +75,7 @@ for noiseSigma  = 5  %%% image noise level
     for i = 1:length(NoisyfilePaths)
         
         %%% read current image
-        label = imread([folderTest 'Real_MeanImage\' meanfilePaths(i).name]);
+        label = imread([folderTest '\' meanfilePaths(i).name]);
         %         label = imread([folderTest meanfilePaths(i).name]);
         [~,nameCur,extCur] = fileparts(meanfilePaths(i).name);
         label = im2double(label);
@@ -83,7 +83,7 @@ for noiseSigma  = 5  %%% image noise level
         %     %%% add Gaussian noise
         %     randn('seed',0);
         %     input = single(label + noiseSigma/255*randn(size(label)));
-        input = imread([folderTest 'Real_NoisyImage\' NoisyfilePaths(i).name]);
+        input = imread([folderTest '\' NoisyfilePaths(i).name]);
         %         input = imread([folderTest NoisyfilePaths(i).name]);
         input = im2double(input);
         
