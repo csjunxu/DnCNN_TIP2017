@@ -78,8 +78,11 @@ for noiseSigma  = 5  %%% image noise level
     % SSIMs = zeros(1,length(filePaths));
     PSNR = zeros(1,length(NoisyfilePaths));
     SSIM = zeros(1,length(NoisyfilePaths));
+    RunTime = [];
     for i = 1:length(NoisyfilePaths)
-        
+        % S = regexp(TT_im_dir(i).name, '\.', 'split');
+        IMname = TT_im_dir(i).name(1:end-9);
+        time0 = clock;
         %%% read current image
         label = imread([folderTest '\' meanfilePaths(i).name]);
         %         label = imread([folderTest meanfilePaths(i).name]);
@@ -107,7 +110,8 @@ for noiseSigma  = 5  %%% image noise level
             output = gather(output);
             input  = gather(input);
         end
-        
+        RunTime = [RunTime etime(clock,time0)];
+        fprintf('Total elapsed time = %f s\n', (etime(clock,time0)) );
         %%% calculate PSNR
         %         [psnr_cur, ssim_cur] = Cal_PSNRSSIM(im2uint8(label),im2uint8(output),0,0);
         psnr_cur=csnr(im2uint8(label), im2uint8(output), 0, 0);
@@ -121,10 +125,11 @@ for noiseSigma  = 5  %%% image noise level
         PSNR(i) = psnr_cur;
         SSIM(i) = ssim_cur;
         fprintf('The final PSNR = %2.4f, SSIM = %2.4f. \n', PSNR(i), SSIM(i));
-        imwrite(im2uint8(output), [write_sRGB_dir '/' method '_our_' NoisyfilePaths(i).name]);
+        imwrite(im2uint8(output), [write_sRGB_dir '/' method '_our_' IMname '.png']);
     end
     mPSNR = mean(PSNR);
     mSSIM = mean(SSIM);
+    mRunTime = mean(RunTime);
     matname = sprintf([write_MAT_dir method '_our.mat']);
-    save(name,'noiseSigma','mSSIM','mPSNR','PSNR','SSIM');
+    save(name,'mSSIM','mPSNR','PSNR','SSIM','RunTime','mRunTime');
 end
