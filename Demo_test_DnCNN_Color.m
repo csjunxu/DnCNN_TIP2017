@@ -97,7 +97,7 @@ for noiseSigma  = [25 30] %%% image noise level
         %             pause(pauseTime)
         %         end
         fprintf('The final PSNR = %2.4f, SSIM = %2.4f. \n', PSNRs(i), SSIMs(i));
-        %         imwrite(im2uint8(output), [write_sRGB_dir method '/' method '_nSig' num2str(nSig(1)) num2str(nSig(2)) num2str(nSig(3)) '_' im_dir(i).name]);
+                imwrite(im2uint8(output), [write_sRGB_dir method '/' method '_nSig' num2str(nSig(1)) num2str(nSig(2)) num2str(nSig(3)) '_' im_dir(i).name]);
     end
     mPSNR = mean(PSNRs);
     mSSIM = mean(SSIMs);
