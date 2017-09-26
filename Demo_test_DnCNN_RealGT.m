@@ -1,8 +1,8 @@
 clear
-GT_Original_image_dir = 'C:\Users\csjunxu\Desktop\CVPR2017\cc_Results\Real_ccnoise_denoised_part\';
-GT_fpath = fullfile(GT_Original_image_dir, '*mean.png');
-TT_Original_image_dir = 'C:\Users\csjunxu\Desktop\CVPR2017\cc_Results\Real_ccnoise_denoised_part\';
-TT_fpath = fullfile(TT_Original_image_dir, '*real.png');
+% GT_Original_image_dir = 'C:\Users\csjunxu\Desktop\CVPR2017\cc_Results\Real_ccnoise_denoised_part\';
+% GT_fpath = fullfile(GT_Original_image_dir, '*mean.png');
+% TT_Original_image_dir = 'C:\Users\csjunxu\Desktop\CVPR2017\cc_Results\Real_ccnoise_denoised_part\';
+% TT_fpath = fullfile(TT_Original_image_dir, '*real.png');
 % GT_Original_image_dir = 'C:\Users\csjunxu\Desktop\CVPR2017\cc_Results\Real_MeanImage\';
 % GT_fpath = fullfile(GT_Original_image_dir, '*.png');
 % TT_Original_image_dir = 'C:\Users\csjunxu\Desktop\CVPR2017\cc_Results\Real_NoisyImage\';
@@ -15,6 +15,10 @@ TT_fpath = fullfile(TT_Original_image_dir, '*real.png');
 % GT_fpath = fullfile(GT_Original_image_dir, '*.png');
 % TT_Original_image_dir = 'C:\Users\csjunxu\Desktop\CVPR2017\1_Results\Real_NoisyImage\';
 % TT_fpath = fullfile(TT_Original_image_dir, '*.png');
+GT_Original_image_dir = 'C:/Users/csjunxu/Desktop/RID_Dataset/RealisticImage/';
+GT_fpath = fullfile(GT_Original_image_dir, '*mean.JPG');
+TT_Original_image_dir = 'C:/Users/csjunxu/Desktop/RID_Dataset/RealisticImage/';
+TT_fpath = fullfile(TT_Original_image_dir, '*real.JPG');
 GT_im_dir  = dir(GT_fpath);
 TT_im_dir  = dir(TT_fpath);
 im_num = length(TT_im_dir);
@@ -28,10 +32,12 @@ folderTest  = TT_Original_image_dir;
 
 method           =  'DnCNN';
 %% write image directory
-write_sRGB_dir = ['C:/Users/csjunxu/Desktop/CVPR2017/cc_Results/'];
+write_MAT_dir = ['C:/Users/csjunxu/Desktop/CVPR2018 Denoising/PolyU_Results/'];
+write_sRGB_dir = ['C:/Users/csjunxu/Desktop/CVPR2018 Denoising/PolyU_Results/' method];
 if ~isdir(write_sRGB_dir)
     mkdir(write_sRGB_dir)
 end
+
 folderModel = 'C:\Users\csjunxu\Desktop\JunXu\Paper\Image Video Denoising\DnCNN-master\model';
 showResult  = 1;
 useGPU      = 0;
@@ -70,8 +76,8 @@ for noiseSigma  = 5  %%% image noise level
     %%% PSNR and SSIM
     % PSNRs = zeros(1,length(filePaths));
     % SSIMs = zeros(1,length(filePaths));
-    PSNRs = zeros(1,length(NoisyfilePaths));
-    SSIMs = zeros(1,length(NoisyfilePaths));
+    PSNR = zeros(1,length(NoisyfilePaths));
+    SSIM = zeros(1,length(NoisyfilePaths));
     for i = 1:length(NoisyfilePaths)
         
         %%% read current image
@@ -112,15 +118,13 @@ for noiseSigma  = 5  %%% image noise level
         %             drawnow;
         %             pause(pauseTime)
         %         end
-        PSNRs(i) = psnr_cur;
-        SSIMs(i) = ssim_cur;
-        fprintf('The final PSNR = %2.4f, SSIM = %2.4f. \n', PSNRs(i), SSIMs(i));
-        imwrite(im2uint8(output), [write_sRGB_dir 'Real_' method '/' method '_our100_' NoisyfilePaths(i).name]);
+        PSNR(i) = psnr_cur;
+        SSIM(i) = ssim_cur;
+        fprintf('The final PSNR = %2.4f, SSIM = %2.4f. \n', PSNR(i), SSIM(i));
+        imwrite(im2uint8(output), [write_sRGB_dir '/' method '_our100_' NoisyfilePaths(i).name]);
     end
-    mPSNR = mean(PSNRs);
-    mSSIM = mean(SSIMs);
-    disp(mPSNR);
-    disp(mSSIM);
-    name = sprintf(['C:/Users/csjunxu/Desktop/CVPR2017/our_Results/', method, '_our100_' num2str(noiseSigma) '.mat']);
-    save(name,'noiseSigma','mSSIM','mPSNR','PSNRs','SSIMs');
+    mPSNR = mean(PSNR);
+    mSSIM = mean(SSIM);
+    matname = sprintf([write_MAT_dir method '_our.mat']);
+    save(name,'noiseSigma','mSSIM','mPSNR','PSNR','SSIM');
 end
