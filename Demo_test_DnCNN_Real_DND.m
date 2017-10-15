@@ -56,7 +56,6 @@ for noiseSigma  = 5  %%% image noise level
             time0 = clock;
             IMinname = [S{1} '_' num2str(j)];
             input = InoisySRGB(info(i).boundingboxes(j,1):info(i).boundingboxes(j,3),info(i).boundingboxes(j,2):info(i).boundingboxes(j,4),1:3);
-            clear InoisySRGB;
             time0 = clock;
             %%% read current image
             label = input;
@@ -85,6 +84,7 @@ for noiseSigma  = 5  %%% image noise level
             fprintf('The final PSNR = %2.4f, SSIM = %2.4f. \n', PSNR(i), SSIM(i));
             imwrite(im2uint8(output), [write_sRGB_dir '/' method '_DND_' IMinname '.png']);
         end
+        clear InoisySRGB;
     end
     mPSNR = mean(PSNR);
     mSSIM = mean(SSIM);
