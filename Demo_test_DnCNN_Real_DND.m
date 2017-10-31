@@ -53,7 +53,6 @@ for noiseSigma  = 5  %%% image noise level
         S = regexp(im_dir(i).name, '\.', 'split');
         [h,w,ch] = size(InoisySRGB);
         for j = 1:size(info(1).boundingboxes,1)
-            time0 = clock;
             IMinname = [S{1} '_' num2str(j)];
             input = InoisySRGB(info(i).boundingboxes(j,1):info(i).boundingboxes(j,3),info(i).boundingboxes(j,2):info(i).boundingboxes(j,4),1:3);
             time0 = clock;
