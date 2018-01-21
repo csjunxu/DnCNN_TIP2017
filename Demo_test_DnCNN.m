@@ -6,8 +6,6 @@
 clear; clc;
 addpath('utilities');
 
-
-
 Original_image_dir  =    'C:\Users\csjunxu\Desktop\Projects\WODL\20images\';
 Sdir = regexp(Original_image_dir, '\', 'split');
 fpath = fullfile(Original_image_dir, '*.png');
