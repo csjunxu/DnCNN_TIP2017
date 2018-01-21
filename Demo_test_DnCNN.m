@@ -6,15 +6,15 @@
 clear; clc;
 addpath('utilities');
 
-Original_image_dir  =    'C:\Users\csjunxu\Desktop\Projects\WODL\20images\';
+Original_image_dir  =    'C:\Users\csjunxu\Desktop\TWSCGIN\cleanimages\';
 Sdir = regexp(Original_image_dir, '\', 'split');
 fpath = fullfile(Original_image_dir, '*.png');
 im_dir  = dir(fpath);
 im_num = length(im_dir);
 
-for nSig  = [20 40 60 80 100]  %%% image noise level
+for nSig  = [20 40 60]  %%% image noise level
     %%% load [specific] Gaussian denoising model
-    folderModel = 'model';
+    folderModel = 'C:\Users\csjunxu\Desktop\JunXu\Paper\Image Video Denoising\DnCNN-master\model';
     showResult  = 0;
     useGPU      = 0;
     pauseTime   = 1;
@@ -78,12 +78,12 @@ for nSig  = [20 40 60 80 100]  %%% image noise level
         PSNR(i) = PSNRCur;
         SSIM(i) = SSIMCur;
         fprintf('%s : PSNR = %2.4f, SSIM = %2.4f \n', im_dir(i).name, PSNR(i), SSIM(i)  );
-        imname = sprintf('C:/Users/csjunxu/Desktop/NIPS2017/W3Results/DnCNN/DnCNN_nSig%d_%s', nSig, im_dir(i).name);
+        imname = sprintf('C:/Users/csjunxu/Desktop/CVPR2018 Denoising/AWGN_Compare/DnCNN_nSig%d_%s', nSig, im_dir(i).name);
         imwrite(output, imname);
     end
     mPSNR=mean(PSNR);
     mSSIM=mean(SSIM);
     fprintf('The average PSNR = %2.4f, SSIM = %2.4f. \n', mPSNR,mSSIM);
-    name = sprintf(['C:/Users/csjunxu/Desktop/NIPS2017/W3Results/DnCNN_nSig' num2str(nSig) '.mat']);
+    name = sprintf(['C:/Users/csjunxu/Desktop/CVPR2018 Denoising/AWGN_Compare/DnCNN_nSig' num2str(nSig) '.mat']);
     save(name, 'nSig','PSNR','SSIM','mPSNR','mSSIM');
 end
