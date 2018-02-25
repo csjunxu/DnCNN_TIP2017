@@ -1,8 +1,5 @@
-
 %%% This is the testing demo for gray image (Gaussian) denoising.
 %%% Training data: 400 images of size 180X180
-
-
 clear; clc;
 addpath('utilities');
 
@@ -12,7 +9,7 @@ fpath = fullfile(Original_image_dir, '*.png');
 im_dir  = dir(fpath);
 im_num = length(im_dir);
 
-for nSig  = [20 40 60]  %%% image noise level
+for nSig  = [80 100]  %%% image noise level
     %%% load [specific] Gaussian denoising model
     folderModel = 'C:\Users\csjunxu\Desktop\JunXu\Paper\Image Video Denoising\DnCNN-master\model';
     showResult  = 0;

@@ -1,8 +1,8 @@
 clear
-% GT_Original_image_dir = 'C:\Users\csjunxu\Desktop\CVPR2017\cc_Results\Real_ccnoise_denoised_part\';
-% GT_fpath = fullfile(GT_Original_image_dir, '*mean.png');
-% TT_Original_image_dir = 'C:\Users\csjunxu\Desktop\CVPR2017\cc_Results\Real_ccnoise_denoised_part\';
-% TT_fpath = fullfile(TT_Original_image_dir, '*real.png');
+GT_Original_image_dir = 'C:\Users\csjunxu\Desktop\CVPR2018 Denoising\cc_Results\Real_ccnoise_denoised_part\';
+GT_fpath = fullfile(GT_Original_image_dir, '*mean.png');
+TT_Original_image_dir = 'C:\Users\csjunxu\Desktop\CVPR2018 Denoising\cc_Results\Real_ccnoise_denoised_part\';
+TT_fpath = fullfile(TT_Original_image_dir, '*real.png');
 % GT_Original_image_dir = 'C:\Users\csjunxu\Desktop\CVPR2017\cc_Results\Real_MeanImage\';
 % GT_fpath = fullfile(GT_Original_image_dir, '*.png');
 % TT_Original_image_dir = 'C:\Users\csjunxu\Desktop\CVPR2017\cc_Results\Real_NoisyImage\';
@@ -15,10 +15,10 @@ clear
 % GT_fpath = fullfile(GT_Original_image_dir, '*.png');
 % TT_Original_image_dir = 'C:\Users\csjunxu\Desktop\CVPR2017\1_Results\Real_NoisyImage\';
 % TT_fpath = fullfile(TT_Original_image_dir, '*.png');
-GT_Original_image_dir = 'C:/Users/csjunxu/Desktop/RID_Dataset/RealisticImage/';
-GT_fpath = fullfile(GT_Original_image_dir, '*mean.JPG');
-TT_Original_image_dir = 'C:/Users/csjunxu/Desktop/RID_Dataset/RealisticImage/';
-TT_fpath = fullfile(TT_Original_image_dir, '*real.JPG');
+% GT_Original_image_dir = 'C:/Users/csjunxu/Desktop/RID_Dataset/RealisticImage/';
+% GT_fpath = fullfile(GT_Original_image_dir, '*mean.JPG');
+% TT_Original_image_dir = 'C:/Users/csjunxu/Desktop/RID_Dataset/RealisticImage/';
+% TT_fpath = fullfile(TT_Original_image_dir, '*real.JPG');
 GT_im_dir  = dir(GT_fpath);
 TT_im_dir  = dir(TT_fpath);
 im_num = length(TT_im_dir);
@@ -32,8 +32,8 @@ folderTest  = TT_Original_image_dir;
 
 method           =  'DnCNN';
 %% write image directory
-write_MAT_dir = ['C:/Users/csjunxu/Desktop/CVPR2018 Denoising/PolyU_Results/'];
-write_sRGB_dir = ['C:/Users/csjunxu/Desktop/CVPR2018 Denoising/PolyU_Results/' method];
+write_MAT_dir = ['C:/Users/csjunxu/Desktop/CVPR2018 Denoising/cc_Results/'];
+write_sRGB_dir = ['C:/Users/csjunxu/Desktop/CVPR2018 Denoising/cc_Results/' method];
 if ~isdir(write_sRGB_dir)
     mkdir(write_sRGB_dir)
 end
@@ -43,7 +43,7 @@ showResult  = 1;
 useGPU      = 0;
 pauseTime   = 1;
 
-for noiseSigma  = 5  %%% image noise level
+for noiseSigma  = [10]  %%% image noise level
     %%% load blind Gaussian denoising model (color image)
     load(fullfile(folderModel,'GD_Color_Blind.mat')); %%% for sigma in [0,55]
     
@@ -125,11 +125,11 @@ for noiseSigma  = 5  %%% image noise level
         PSNR(i) = psnr_cur;
         SSIM(i) = ssim_cur;
         fprintf('The final PSNR = %2.4f, SSIM = %2.4f. \n', PSNR(i), SSIM(i));
-        imwrite(im2uint8(output), [write_sRGB_dir '/' method '_our_' IMname '.png']);
+        imwrite(im2uint8(output), [write_sRGB_dir '/' method '_cc_'  num2str(noiseSigma) '_' IMname '.png']);
     end
     mPSNR = mean(PSNR);
     mSSIM = mean(SSIM);
     mRunTime = mean(RunTime);
-    matname = sprintf([write_MAT_dir method '_our.mat']);
+    matname = sprintf([write_MAT_dir method '_cc' num2str(noiseSigma) '.mat']);
     save(matname,'mSSIM','mPSNR','PSNR','SSIM','RunTime','mRunTime');
 end
