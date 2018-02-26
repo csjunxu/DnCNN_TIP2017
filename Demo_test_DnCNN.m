@@ -9,7 +9,7 @@ fpath = fullfile(Original_image_dir, '*.png');
 im_dir  = dir(fpath);
 im_num = length(im_dir);
 
-for nSig  = [80 100]  %%% image noise level
+for nSig  = [85:5:100]  %%% image noise level
     %%% load [specific] Gaussian denoising model
     folderModel = 'C:\Users\csjunxu\Desktop\JunXu\Paper\Image Video Denoising\DnCNN-master\model';
     showResult  = 0;
