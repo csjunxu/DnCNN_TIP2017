@@ -16,7 +16,7 @@ if ~isdir(writefilepath)
     mkdir(writefilepath);
 end
 
-for nSig  = [15:15:75]  %%% image noise level
+for nSig  = [15 25 35 50 75]  %%% image noise level
     %%% load [specific] Gaussian denoising model
     folderModel = 'C:\Users\csjunxu\Desktop\JunXu\Paper\Image Video Denoising\DnCNN-master\model';
     showResult  = 0;
@@ -82,7 +82,7 @@ for nSig  = [15:15:75]  %%% image noise level
         PSNR(i) = PSNRCur;
         SSIM(i) = SSIMCur;
         fprintf('%s : PSNR = %2.4f, SSIM = %2.4f \n', im_dir(i).name, PSNR(i), SSIM(i)  );
-        imname = sprintf([writefilepath method '_nSig' num2str(nSig)  '_'  im_dir(i).name]);
+        imname = sprintf([writefilepath method '/' method '_nSig' num2str(nSig)  '_'  im_dir(i).name]);
         imwrite(output, imname);
     end
     mPSNR=mean(PSNR);
